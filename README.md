@@ -354,8 +354,10 @@ The log below records verifiable project milestones following the required layou
 
 ---
 
-## 👥 Contributors & Contact
+## 👥 Authors & Contributors
 
-* **Lead Architect & Developer:** Sourabh Kumar Behera ([@sxrabx](https://github.com/sxrabx))
-* **Repository Link:** [https://github.com/sxrabx/skillgraph-ats](https://github.com/sxrabx/skillgraph-ats)
-* **License:** MIT License (See `LICENSE` file if present, or open source standard).
+* **Sourabh Kumar Behera** ([@sxrabx](https://github.com/sxrabx)) — Lead Architect & Full-Stack Developer
+* **Ankit Padhi** ([@ankitpadhi04](https://github.com/ankitpadhi04)) — Core Developer & Contributor
+
+* **Repository:** [https://github.com/sxrabx/SkillGraph-ats](https://github.com/sxrabx/SkillGraph-ats)
+* **License:** [MIT License](LICENSE)
