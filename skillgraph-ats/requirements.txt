@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+pydantic
+groq
+pypdf
+sentence-transformers
+scikit-learn
+numpy
+networkx
+requests
+pymupdf>=1.24.0
+reportlab>=4.0.0

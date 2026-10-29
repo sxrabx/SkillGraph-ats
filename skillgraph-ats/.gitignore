@@ -1,0 +1,10 @@
+# Python
+.venv/
+__pycache__/
+temp_uploads/
+
+# Node
+frontend/node_modules/
+
+# Secrets
+.env
