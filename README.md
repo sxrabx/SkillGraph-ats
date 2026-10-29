@@ -7,7 +7,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![NVIDIA NIM](https://img.shields.io/badge/NVIDIA%20NIM-Nemotron--3--Embed--1B-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com)
 [![Groq LPU](https://img.shields.io/badge/Groq%20LPU-Qwen%203.8%2027B-F55036?style=for-the-badge)](https://groq.com)
-[![NetworkX](https://img.shields.io/badge/NetworkX-DAG%20Ontology-blue?style=for-the-badge)](https://networkx.org)
+[![NetworkX](https://img.shields.io/badge/NetworkX-DAG_Ontology-1f425f?style=for-the-badge&logo=python&logoColor=white)](https://networkx.org)
 [![PyMuPDF](https://img.shields.io/badge/PyMuPDF-1.24+-brightgreen?style=for-the-badge)](https://pymupdf.readthedocs.io)
 
 **An enterprise-grade, explainable recruitment platform that replaces naive keyword filters with Knowledge Graph reasoning, 2048-dimensional Cloud GPU embeddings, real-time PDF visual annotation, and guardrailed GraphRAG recruiter chat.**
