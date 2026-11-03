@@ -7,12 +7,12 @@ echo       SkillGraph ATS - Full Stack Launcher
 echo ======================================================
 echo.
 echo [*] Launching Backend Server in a new window...
-start "SkillGraph ATS - Backend" cmd /c "%~dp0run_backend.bat"
+start "SkillGraph ATS - Backend" cmd /k "%~dp0run_backend.bat"
 
 timeout /t 2 /nobreak >nul
 
 echo [*] Launching Frontend Client in a new window...
-start "SkillGraph ATS - Frontend" cmd /c "%~dp0run_frontend.bat"
+start "SkillGraph ATS - Frontend" cmd /k "%~dp0run_frontend.bat"
 
 echo.
 echo [STATUS: OK] Both services have been launched!

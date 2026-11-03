@@ -38,6 +38,9 @@ if exist "node_modules\" (
     echo [STATUS: OK] Node dependencies detected.
 )
 
+:: Free port 5173 if held by an orphaned process
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5173" ^| findstr "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
+
 :: 3. Port & URL Status Summary
 echo.
 echo ======================================================

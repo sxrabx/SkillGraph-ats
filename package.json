@@ -1,0 +1,12 @@
+{
+  "name": "skillgraph-ats-root",
+  "private": true,
+  "description": "SkillGraph ATS root runner",
+  "scripts": {
+    "dev": "npm --prefix skillgraph-ats/frontend run dev",
+    "build": "npm --prefix skillgraph-ats/frontend run build",
+    "start": "npm --prefix skillgraph-ats/frontend run dev",
+    "lint": "npm --prefix skillgraph-ats/frontend run lint"
+  }
+}
+

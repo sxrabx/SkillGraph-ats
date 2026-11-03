@@ -8,41 +8,45 @@ echo          SkillGraph ATS - Backend Launcher
 echo ======================================================
 echo.
 
-:: Navigate to skillgraph-ats folder
 cd /d "%~dp0skillgraph-ats"
 
 echo [*] Checking system environment...
 
-:: 1. Check Virtual Environment
+if not exist ".venv\Scripts\python.exe" goto :no_venv
+goto :venv_ok
+
+:no_venv
+echo [STATUS: WARNING] .venv not found. Creating virtual environment...
+python -m venv .venv
 if not exist ".venv\Scripts\python.exe" (
-    echo [STATUS: FAILED] Virtual environment folder .venv was not found in:
-    echo %cd%
-    echo Please create or install .venv first.
-    echo.
+    echo [STATUS: FAILED] Could not create virtual environment.
     pause
     exit /b 1
 )
-echo [STATUS: OK] Virtual environment detected: .venv
-
-:: 2. Check .env and API key
-if exist ".env" (
-    findstr /i "GROQ_API_KEY=" .env >nul 2>&1
-    if errorlevel 1 (
-        echo [STATUS: WARNING] .env found, but GROQ_API_KEY is missing.
-    ) else (
-        echo [STATUS: OK] GROQ_API_KEY is configured in .env
-    )
-    findstr /i "NVIDIA_API_KEY=" .env >nul 2>&1
-    if errorlevel 1 (
-        echo [STATUS: WARNING] .env found, but NVIDIA_API_KEY is missing.
-    ) else (
-        echo [STATUS: OK] NVIDIA_API_KEY is configured in .env ^(Cloud Embeddings Active^)
-    )
-) else (
-    echo [STATUS: WARNING] .env file not found.
+echo [*] Installing requirements...
+".venv\Scripts\pip.exe" install -r requirements.txt
+if errorlevel 1 (
+    echo [STATUS: FAILED] Failed to install requirements.
+    pause
+    exit /b 1
 )
 
-:: 3. Port & URL Status Summary
+:venv_ok
+echo [STATUS: OK] Virtual environment detected: .venv
+
+if not exist ".env" (
+    if exist "..\.env" copy /y "..\.env" ".env" >nul
+)
+
+if not exist ".env" (
+    echo [STATUS: WARNING] .env file not found.
+) else (
+    echo [STATUS: OK] .env file found.
+)
+
+:: Free port 8000 if held by an orphaned process
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000" ^| findstr "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
+
 echo.
 echo ======================================================
 echo                 BACKEND SERVER STATUS
@@ -59,7 +63,6 @@ echo Press Ctrl+C anytime to stop the server.
 echo ------------------------------------------------------
 echo.
 
-:: Activate environment and run uvicorn
 call .\.venv\Scripts\activate.bat
 ".venv\Scripts\python.exe" -m uvicorn app.main:app --reload --port 8000
 
