@@ -4038,6 +4038,6 @@ body, button, input, select, textarea {
 /* Jump to latest button hover */
 .btn-jump-to-latest:hover {
   background: #1e1b4b !important;
-  transform: translateX(-50%) translateY(-2px) !important;
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35) !important;
+  transform: none !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45) !important;
 }

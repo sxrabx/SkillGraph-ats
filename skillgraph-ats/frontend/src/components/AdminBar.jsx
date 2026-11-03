@@ -22,6 +22,8 @@ export default function AdminBar({ user }) {
 
   useEffect(() => {
     checkHealth()
+    const interval = setInterval(checkHealth, 4000)
+    return () => clearInterval(interval)
   }, [])
 
   if (user?.role !== 'admin') return null

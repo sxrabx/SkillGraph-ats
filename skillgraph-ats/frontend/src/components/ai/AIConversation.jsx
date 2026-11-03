@@ -137,7 +137,8 @@ export default function AIConversation({
               fontSize: '0.8rem',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: prefersReducedMotion ? 'none' : 'transform 0.15s ease, background 0.15s ease'
+              transform: 'none',
+              transition: 'background 0.15s ease, box-shadow 0.15s ease'
             }}
           >
             <span>Jump to latest</span>

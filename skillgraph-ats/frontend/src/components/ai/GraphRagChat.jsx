@@ -132,60 +132,100 @@ export default function GraphRagChat({
       used: Math.min(prev.limit, prev.used + promptText.length * 2 + 120)
     }))
 
-    // Query backend or stream intelligent demo reply
+    abortControllerRef.current = new AbortController()
     try {
-      let fullReply = ''
-
-      // Attempt live backend fetch
       let usedBackend = false
+
+      // 1. Attempt true live real-time token streaming from backend
       try {
         const formData = new FormData()
         formData.append("candidate_name", selectedCandidate)
         formData.append("question", promptText)
+        const recentHistory = messages.slice(-5).map(m => ({
+          role: m.from === "assistant" ? "assistant" : "user",
+          content: m.text
+        }))
+        formData.append("history", JSON.stringify(recentHistory))
 
-        const res = await fetch(`${API_URL}/api/chat`, {
+        const res = await fetch(`${API_URL}/api/chat/stream`, {
           method: "POST",
           body: formData,
-          signal: abortControllerRef.current ? abortControllerRef.current.signal : undefined
+          signal: abortControllerRef.current.signal
         })
-        if (res.ok) {
-          const data = await res.json()
-          fullReply = data.reply
+
+        if (res.ok && res.body) {
           usedBackend = true
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder("utf-8")
+          let accumulatedText = ""
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            const chunk = decoder.decode(value, { stream: true })
+            accumulatedText += chunk
+
+            setMessages(prev => prev.map(m => {
+              if (m.id === assistantMsgId) {
+                return {
+                  ...m,
+                  text: accumulatedText,
+                  isStreaming: true
+                }
+              }
+              return m
+            }))
+          }
+
+          setMessages(prev => prev.map(m => {
+            if (m.id === assistantMsgId) {
+              return {
+                ...m,
+                text: accumulatedText,
+                isStreaming: false
+              }
+            }
+            return m
+          }))
+          setStreamState('done')
+          setTimeout(() => setStreamState('idle'), 500)
         }
       } catch (e) {
-        // Fallback to intelligent local demo reply
-      }
-
-      if (!usedBackend) {
-        fullReply = getDemoChatReply(selectedCandidate, promptText)
-      }
-
-      // Stream the words token-by-token for the true AIResponse experience!
-      const words = fullReply.split(' ')
-      let currentWordIndex = 0
-
-      const interval = setInterval(() => {
-        currentWordIndex += 2
-        const currentText = words.slice(0, currentWordIndex).join(' ')
-
-        setMessages(prev => prev.map(m => {
-          if (m.id === assistantMsgId) {
-            return {
-              ...m,
-              text: currentText,
-              isStreaming: currentWordIndex < words.length
-            }
-          }
-          return m
-        }))
-
-        if (currentWordIndex >= words.length) {
-          clearInterval(interval)
-          setStreamState('done')
-          setTimeout(() => setStreamState('idle'), 800)
+        if (e.name === 'AbortError') {
+          setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, isStreaming: false } : m))
+          setStreamState('idle')
+          return
         }
-      }, 45)
+      }
+
+      // 2. Fallback to local demo reply simulation if backend is offline
+      if (!usedBackend) {
+        const fullReply = getDemoChatReply(selectedCandidate, promptText)
+        const words = fullReply.split(' ')
+        let currentWordIndex = 0
+
+        const interval = setInterval(() => {
+          currentWordIndex += 2
+          const currentText = words.slice(0, currentWordIndex).join(' ')
+
+          setMessages(prev => prev.map(m => {
+            if (m.id === assistantMsgId) {
+              return {
+                ...m,
+                text: currentText,
+                isStreaming: currentWordIndex < words.length
+              }
+            }
+            return m
+          }))
+
+          if (currentWordIndex >= words.length) {
+            clearInterval(interval)
+            setStreamState('done')
+            setTimeout(() => setStreamState('idle'), 500)
+          }
+        }, 35)
+      }
 
     } catch (err) {
       console.error("Chat error:", err)

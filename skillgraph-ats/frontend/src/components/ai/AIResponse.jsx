@@ -17,15 +17,25 @@ export default function AIResponse({
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   // Parse text into tokens: words, spaces, newlines, and [n] citation markers
-  const tokens = useMemo(() => {
-    if (!text) return []
-    // Match citation pattern [1], [2], or normal words/whitespace
-    const regex = /(\[\d+\]|\n|\s+|[^\s\n\[]+)/g
-    const matches = text.match(regex) || []
-    return matches
+  // Clean raw markdown symbols (###, **, *) so text reads naturally and professionally
+  const sanitizedText = useMemo(() => {
+    if (!text) return ''
+    return text
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/^[\*]\s+/gm, '• ')
+      .replace(/[\*]{1,2}/g, '')
   }, [text])
 
-  // Count current words
+  // Parse text into tokens: words, spaces, newlines, and [n] citation markers
+  const tokens = useMemo(() => {
+    if (!sanitizedText) return []
+    // Match citation pattern [1], [2], or normal words/whitespace
+    const regex = /(\[\d+\]|\n|\s+|[^\s\n\[]+)/g
+    const matches = sanitizedText.match(regex) || []
+    return matches
+  }, [sanitizedText])
+
   const currentTokenCount = tokens.length
   const previousTokenCount = prevWordCountRef.current
   prevWordCountRef.current = currentTokenCount

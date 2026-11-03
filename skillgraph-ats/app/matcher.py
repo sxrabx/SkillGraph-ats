@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import requests
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -14,49 +14,81 @@ NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
 NVIDIA_EMBED_URL = "https://integrate.api.nvidia.com/v1/embeddings"
 NVIDIA_MODEL = "nvidia/nemotron-3-embed-1b"
 
+# High-performance in-memory cache for skill embeddings (prevents redundant API calls)
+_EMBEDDING_CACHE: Dict[str, np.ndarray] = {}
+
 def get_embeddings(texts: List[str]) -> np.ndarray:
     """
-    Computes text embeddings using NVIDIA NIM Cloud API.
-    Runs 100% on NVIDIA Cloud GPUs (zero local CPU/GPU load).
+    Computes text embeddings using NVIDIA NIM Cloud API with fast in-memory caching.
+    Runs 100% on NVIDIA Cloud GPUs with zero redundant network requests for cached skills.
     """
     if not texts:
         return np.empty((0, 2048))
-        
-    api_key = os.getenv("NVIDIA_API_KEY") or NVIDIA_API_KEY
-    if not api_key:
-        raise ValueError("NVIDIA_API_KEY is not configured in .env")
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "input": texts,
-        "model": NVIDIA_MODEL,
-        "input_type": "query"
-    }
-    
-    response = requests.post(NVIDIA_EMBED_URL, headers=headers, json=payload, timeout=20)
-    if response.status_code != 200:
-        raise RuntimeError(f"NVIDIA NIM API Error ({response.status_code}): {response.text}")
+    # Identify uncached texts
+    uncached_texts = []
+    for t in texts:
+        clean_t = t.strip()
+        if clean_t and clean_t not in _EMBEDDING_CACHE:
+            uncached_texts.append(clean_t)
+
+    # Fetch uncached embeddings in batch from NVIDIA NIM
+    if uncached_texts:
+        api_key = os.getenv("NVIDIA_API_KEY") or NVIDIA_API_KEY
+        if not api_key:
+            raise ValueError("NVIDIA_API_KEY is not configured in .env")
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "input": uncached_texts,
+            "model": NVIDIA_MODEL,
+            "input_type": "query"
+        }
         
-    data = response.json()
-    embeddings = [item["embedding"] for item in data["data"]]
-    return np.array(embeddings)
+        response = requests.post(NVIDIA_EMBED_URL, headers=headers, json=payload, timeout=20)
+        if response.status_code != 200:
+            raise RuntimeError(f"NVIDIA NIM API Error ({response.status_code}): {response.text}")
+            
+        data = response.json()
+        for idx, item in enumerate(data.get("data", [])):
+            clean_t = uncached_texts[idx]
+            _EMBEDDING_CACHE[clean_t] = np.array(item["embedding"], dtype=np.float32)
+
+    # Assemble output array preserving original order
+    results = []
+    for t in texts:
+        clean_t = t.strip()
+        if clean_t in _EMBEDDING_CACHE:
+            results.append(_EMBEDDING_CACHE[clean_t])
+        else:
+            # Fallback zero vector if text was whitespace only
+            results.append(np.zeros((2048,), dtype=np.float32))
+
+    return np.array(results)
 
 # Initialize the inference graph
 skill_graph = build_skill_graph()
 
-def evaluate_candidate(candidate_profile: List[str], required_skills: List[str], threshold: float = 0.40) -> Dict[str, Any]:
+def evaluate_candidate(
+    candidate_profile: List[str], 
+    required_skills: List[str], 
+    threshold: float = 0.40,
+    precomputed_required_vectors: Optional[np.ndarray] = None
+) -> Dict[str, Any]:
     """
     Compares the candidate's expanded profile against JD requirements
-    using NVIDIA Cloud Embeddings.
+    using NVIDIA Cloud Embeddings and vector cosine similarity.
+    Supports precomputed JD vectors to eliminate redundant embeddings computation.
     """
     if not candidate_profile or not required_skills:
         return {"matched": [], "missing": required_skills, "score": 0.0}
 
     candidate_vectors = get_embeddings(candidate_profile)
-    required_vectors = get_embeddings(required_skills)
+    required_vectors = precomputed_required_vectors if precomputed_required_vectors is not None else get_embeddings(required_skills)
+    
     sim_matrix = cosine_similarity(required_vectors, candidate_vectors)
 
     matched = []
@@ -78,11 +110,15 @@ def evaluate_candidate(candidate_profile: List[str], required_skills: List[str],
     match_percentage = round((len(matched) / len(required_skills)) * 100, 2)
     return {"matched": matched, "missing": missing, "score": match_percentage}
 
-def rank_candidates(candidates: List[ResumeData], jd: JobDescriptionData, top_k: int = 2) -> List[Dict[str, Any]]:
+def rank_candidates(candidates: List[ResumeData], jd: JobDescriptionData, top_k: int = 10) -> List[Dict[str, Any]]:
     """
     Evaluates all candidates using their graph-inferred profiles and returns the top K.
+    Precomputes the JD embeddings once upfront for optimal multi-candidate throughput.
     """
     results = []
+
+    # Precompute JD required skills vectors ONCE for the entire batch
+    required_vectors = get_embeddings(jd.required_skills) if jd.required_skills else np.empty((0, 2048))
 
     for candidate in candidates:
         # 1. Aggregate explicit skills from their list and projects
@@ -93,8 +129,12 @@ def rank_candidates(candidates: List[ResumeData], jd: JobDescriptionData, top_k:
         # 2. Graph Inference: Expand profile using 'Implies' edges
         expanded_profile = infer_latent_skills(list(explicit_skills), skill_graph)
 
-        # 3. Evaluate expanded profile against the JD
-        evaluation = evaluate_candidate(list(expanded_profile), jd.required_skills)
+        # 3. Evaluate expanded profile against the JD with precomputed vectors
+        evaluation = evaluate_candidate(
+            candidate_profile=list(expanded_profile), 
+            required_skills=jd.required_skills,
+            precomputed_required_vectors=required_vectors
+        )
 
         # Track what was directly written vs what the graph inferred
         inferred_only = expanded_profile - explicit_skills
@@ -113,25 +153,17 @@ def rank_candidates(candidates: List[ResumeData], jd: JobDescriptionData, top_k:
     return results[:top_k]
 
 if __name__ == "__main__":
-    # Test Data: JD asks for broad competencies
     target_jd = JobDescriptionData(
         role_title="Backend Engineer",
         required_skills=["Python", "Cloud Infrastructure", "CI/CD Pipelines", "Database Administration"]
     )
 
-    # Test Data: Candidate only lists specific tools
     test_candidate = ResumeData(
         candidate_name="Alex Doe",
         skills=["FastAPI", "PostgreSQL"],
         projects=[Project(title="Deployment", description="Setup", technologies=["Docker", "GitHub Actions"])]
     )
 
-    print(f"Target JD Requirements: {target_jd.required_skills}\n")
-    
     top_candidates = rank_candidates([test_candidate], target_jd, top_k=1)
-    
     for cand in top_candidates:
         print(f"Candidate: {cand['name']} | Score: {cand['match_score']}%")
-        print(f"Explicitly Wrote: {cand['explicit_skills']}")
-        print(f"Graph Inferred:   {cand['inferred_skills']}")
-        print(f"Matched On:       {[m['required_skill'] for m in cand['matched_requirements']]}")
