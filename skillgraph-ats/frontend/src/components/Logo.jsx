@@ -40,7 +40,7 @@ export default function Logo({ className = '', height = 44, forceTheme = null })
       >
         <span>Skill</span>
         <span style={{ 
-          background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+          background: 'linear-gradient(135deg, #ff7700 0%, #ff4500 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           position: 'relative'

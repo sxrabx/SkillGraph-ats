@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from 'react'
-import { ExternalLink, Menu, X, ArrowRight } from 'lucide-react'
-import Logo from './Logo'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+
+// 4-Point Concave Star Icon matching the user's reference image
+function AlvorStarIcon({ size = 20, className = '' }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.8" 
+      strokeLinecap="round" 
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M10 3.5C10 7.8 7.8 10 3.5 10" />
+      <path d="M14 3.5C14 7.8 16.2 10 20.5 10" />
+      <path d="M10 20.5C10 16.2 7.8 14 3.5 14" />
+      <path d="M14 20.5C14 16.2 16.2 14 20.5 14" />
+    </svg>
+  )
+}
 
 export default function Navbar({ onOpenDemo, onOpenAuth, user, onGoToDashboard, onLogout }) {
   const [scrolled, setScrolled] = useState(false)
@@ -24,84 +45,86 @@ export default function Navbar({ onOpenDemo, onOpenAuth, user, onGoToDashboard, 
   }
 
   return (
-    <header className={`landing-navbar ${scrolled ? 'scrolled' : ''}`}>
-      <div className="navbar-inner">
-        {/* Left: Brand Logo */}
-        <div className="navbar-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <Logo height={44} />
+    <header className={`landing-navbar-floating-wrapper ${scrolled ? 'is-scrolled' : ''}`}>
+      <div className="landing-navbar landing-navbar-alvor">
+        {/* LEFT CLUSTER: Star Icon + Brand Name + Nav Links directly next to it */}
+        <div className="nav-alvor-left-cluster">
+          <div 
+            className="nav-alvor-brand" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            role="button"
+            tabIndex={0}
+            title="SkillGraph ATS"
+          >
+            <AlvorStarIcon size={20} className="nav-alvor-star-icon" />
+            <span className="nav-alvor-brand-text">SKILLGRAPH</span>
+          </div>
+
+          <nav className="nav-alvor-links" aria-label="Main Navigation">
+            <button type="button" onClick={() => scrollToSection('product')} className="nav-alvor-link">
+              Product
+            </button>
+            <button type="button" onClick={() => scrollToSection('technology')} className="nav-alvor-link">
+              Technology
+            </button>
+            <button type="button" onClick={() => scrollToSection('demo-comparison')} className="nav-alvor-link">
+              Comparison
+            </button>
+            <button type="button" onClick={() => scrollToSection('pricing')} className="nav-alvor-link">
+              Pricing
+            </button>
+          </nav>
         </div>
 
-        {/* Center: Nav links */}
-        <nav className="navbar-nav-links">
-          <button type="button" onClick={() => scrollToSection('product')} className="nav-link">
-            Product
-          </button>
-          <button type="button" onClick={() => scrollToSection('technology')} className="nav-link">
-            Technology
-          </button>
-          <button type="button" onClick={() => scrollToSection('use-cases')} className="nav-link">
-            Use Cases
-          </button>
-          <button type="button" onClick={() => scrollToSection('pricing')} className="nav-link">
-            Pricing
-          </button>
-        </nav>
+        {/* RIGHT CLUSTER: 01 / THE GRAPH + ThemeToggle + Pill Button */}
+        <div className="nav-alvor-right-cluster">
+          <span className="nav-alvor-tag">01 / THE GRAPH</span>
 
-        {/* Right: Actions */}
-        <div className="navbar-actions">
-          {/* Sun Moon Theme Toggle replacing secondary Request Demo button as specified */}
-          <ThemeToggle variant="sun-moon" size="md" />
+          <ThemeToggle variant="sun-moon" size="sm" />
 
           {user ? (
             <div className="nav-user-logged">
               <button 
                 type="button" 
                 onClick={onGoToDashboard} 
-                className="btn-nav-dashboard"
+                className="nav-alvor-pill-btn"
               >
-                <span>{user.role === 'admin' ? '🛡️' : '👩‍💼'} Enter Workspace</span>
-                <ArrowRight size={15} />
+                <span>Enter Workspace</span>
+                <ArrowRight size={13} />
+                <span className="alvor-btn-glow"></span>
               </button>
               <button type="button" onClick={onLogout} className="nav-link-logout">
                 Log Out
               </button>
             </div>
           ) : (
-            <>
-              <button 
-                type="button" 
-                onClick={() => scrollToSection('for-recruiters')} 
-                className="nav-link-external"
-              >
-                For Recruiters <ExternalLink size={13} style={{ marginLeft: 3 }} />
-              </button>
-
+            <div className="nav-alvor-actions">
               <button 
                 type="button" 
                 onClick={() => onOpenAuth('login')} 
-                className="btn-nav-ghost"
+                className="nav-alvor-ghost-link"
               >
                 Sign In
               </button>
-
               <button 
                 type="button" 
-                onClick={() => onOpenAuth('signup')} 
-                className="btn-nav-primary"
+                onClick={onOpenDemo} 
+                className="nav-alvor-pill-btn"
               >
-                Sign Up
+                <span>Request Demo</span>
+                <span className="alvor-btn-glow"></span>
               </button>
-            </>
+            </div>
           )}
 
-          {/* Mobile Hamburger Toggle */}
+          {/* Mobile Menu Toggle */}
           <button 
             type="button" 
             className="mobile-menu-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
@@ -110,37 +133,51 @@ export default function Navbar({ onOpenDemo, onOpenAuth, user, onGoToDashboard, 
       {mobileMenuOpen && (
         <div className="navbar-mobile-drawer">
           <button type="button" onClick={() => scrollToSection('product')} className="mobile-nav-link">
-            Product
+            Product Architecture
           </button>
           <button type="button" onClick={() => scrollToSection('technology')} className="mobile-nav-link">
-            Technology
+            Technology Matrix
           </button>
-          <button type="button" onClick={() => scrollToSection('use-cases')} className="mobile-nav-link">
-            Use Cases
+          <button type="button" onClick={() => scrollToSection('demo-comparison')} className="mobile-nav-link">
+            Comparison
           </button>
           <button type="button" onClick={() => scrollToSection('pricing')} className="mobile-nav-link">
-            Pricing
+            Pricing Plans
           </button>
+
           <div className="mobile-drawer-divider"></div>
-          {user ? (
-            <>
-              <button type="button" onClick={onGoToDashboard} className="btn-nav-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Open ATS Workspace
+
+          <div className="mobile-auth-stack">
+            {user ? (
+              <button 
+                type="button" 
+                onClick={() => { setMobileMenuOpen(false); onGoToDashboard(); }} 
+                className="nav-alvor-pill-btn"
+                style={{ width: '100%' }}
+              >
+                <span>Enter Workspace</span>
               </button>
-              <button type="button" onClick={onLogout} className="mobile-nav-link">
-                Log Out ({user.name})
-              </button>
-            </>
-          ) : (
-            <div className="mobile-auth-stack">
-              <button type="button" onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }} className="btn-nav-ghost" style={{ width: '100%' }}>
-                Sign In
-              </button>
-              <button type="button" onClick={() => { setMobileMenuOpen(false); onOpenAuth('signup'); }} className="btn-nav-primary" style={{ width: '100%' }}>
-                Sign Up
-              </button>
-            </div>
-          )}
+            ) : (
+              <>
+                <button 
+                  type="button" 
+                  onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }} 
+                  className="nav-alvor-ghost-link"
+                  style={{ textAlign: 'center' }}
+                >
+                  Sign In
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => { setMobileMenuOpen(false); onOpenDemo(); }} 
+                  className="nav-alvor-pill-btn"
+                  style={{ width: '100%' }}
+                >
+                  <span>Request Demo</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </header>

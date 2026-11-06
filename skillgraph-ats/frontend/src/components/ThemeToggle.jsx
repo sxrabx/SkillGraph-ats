@@ -71,8 +71,8 @@ export default function ThemeToggle({
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '50%',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid #e2e8f0',
-            background: isDark ? '#12121c' : '#f8fafc',
+            border: isDark ? '1.5px solid rgba(255, 255, 255, 0.16)' : '1.5px solid var(--border-subtle, #ded7c8)',
+            background: isDark ? '#121418' : 'var(--bg-surface-subtle, #efeae0)',
             cursor: 'pointer',
             padding: 0,
             boxShadow: isDark ? '0 2px 8px rgba(0, 0, 0, 0.4)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
@@ -116,7 +116,7 @@ export default function ThemeToggle({
               mask={`url(#${maskId})`}
               animate={{
                 r: isDark ? 7.2 : 5,
-                fill: isDark ? '#c084fc' : '#f59e0b'
+                fill: isDark ? '#ff5500' : '#ff7700'
               }}
               transition={
                 shouldReduceMotion
@@ -177,13 +177,13 @@ export default function ThemeToggle({
      ============================================================ */
   const options = showSystem
     ? [
-        { id: 'light', label: 'Light', icon: Sun, color: '#f59e0b' },
-        { id: 'dark', label: 'Dark', icon: Moon, color: '#a78bfa' },
+        { id: 'light', label: 'Light', icon: Sun, color: '#ff5500' },
+        { id: 'dark', label: 'Dark', icon: Moon, color: '#ff5500' },
         { id: 'system', label: 'System', icon: Laptop, color: '#94a3b8' }
       ]
     : [
-        { id: 'light', label: 'Light', icon: Sun, color: '#f59e0b' },
-        { id: 'dark', label: 'Dark', icon: Moon, color: '#a78bfa' }
+        { id: 'light', label: 'Light', icon: Sun, color: '#ff5500' },
+        { id: 'dark', label: 'Dark', icon: Moon, color: '#ff5500' }
       ]
 
   return (

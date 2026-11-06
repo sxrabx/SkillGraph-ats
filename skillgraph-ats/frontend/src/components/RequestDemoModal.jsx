@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { X, CheckCircle, Sparkles, Building, Mail, User, Briefcase } from 'lucide-react'
+import SpringHeading from './SpringHeading'
 
 export default function RequestDemoModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ export default function RequestDemoModal({ isOpen, onClose }) {
               <div className="modal-badge">
                 <Sparkles size={14} /> Enterprise Demo Walkthrough
               </div>
-              <h2>See SkillGraph In Action</h2>
+              <SpringHeading tag="h2" align="left">See SkillGraph In Action</SpringHeading>
               <p>Experience how neuro-symbolic DAG ontology replaces keyword blindness with real engineering competency mapping.</p>
             </div>
 
@@ -113,7 +114,9 @@ export default function RequestDemoModal({ isOpen, onClose }) {
         ) : (
           <div className="modal-success">
             <CheckCircle size={56} className="success-icon" />
-            <h2>Demo Request Received!</h2>
+            <SpringHeading tag="h2" align="center" className="justify-center">
+              Demo Request Received!
+            </SpringHeading>
             <p>
               Thank you, <strong>{formData.name}</strong>. Our enterprise solutions team at SkillGraph will connect with you at <strong>{formData.email}</strong> within 1 business day.
             </p>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Lock, Mail, User, Shield, Briefcase, ArrowRight, Sparkles, KeyRound, CheckCircle2 } from 'lucide-react'
 import Logo from './Logo'
+import SpringHeading from './SpringHeading'
 
 export default function AuthPage({ initialMode = 'login', onLoginSuccess, onGoToLanding }) {
   const [mode, setMode] = useState(initialMode) // 'login' | 'signup'
@@ -100,11 +101,16 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onGoTo
             <div className="auth-brand-badge">
               <Sparkles size={14} /> Neuro-Symbolic Recruiting Engine
             </div>
-            <h1 className="auth-card-title">
+            <SpringHeading 
+              tag="h1" 
+              align="center" 
+              className="auth-card-title justify-center" 
+              key={`${mode}-${role}`}
+            >
               {mode === 'login' 
                 ? (role === 'admin' ? 'Admin Security Console' : 'Recruiter Sign In') 
                 : 'Create Recruiter Account'}
-            </h1>
+            </SpringHeading>
             <p className="auth-card-subtitle">
               {mode === 'login' 
                 ? 'Sign in to access real-time GraphRAG candidate evaluation and highlighted resume inspections.' 

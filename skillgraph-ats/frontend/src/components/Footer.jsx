@@ -1,5 +1,6 @@
 import React from 'react'
 import Logo from './Logo'
+import SpringHeading from './SpringHeading'
 import { Shield, Heart } from 'lucide-react'
 
 export default function Footer({ onOpenDemo, onOpenAuth }) {
@@ -27,7 +28,7 @@ export default function Footer({ onOpenDemo, onOpenAuth }) {
 
           {/* Col 2: Product */}
           <div className="footer-col">
-            <h4 className="footer-col-title">Product</h4>
+            <SpringHeading tag="h4" align="left" className="footer-col-title">Product</SpringHeading>
             <ul className="footer-link-list">
               <li><a href="#product">DAG Ontology Engine</a></li>
               <li><a href="#technology">2048-dim Embeddings</a></li>
@@ -39,7 +40,7 @@ export default function Footer({ onOpenDemo, onOpenAuth }) {
 
           {/* Col 3: Technology */}
           <div className="footer-col">
-            <h4 className="footer-col-title">Technology</h4>
+            <SpringHeading tag="h4" align="left" className="footer-col-title">Technology</SpringHeading>
             <ul className="footer-link-list">
               <li><a href="#technology">NVIDIA Nemotron-3 NIM</a></li>
               <li><a href="#technology">Groq LPU (Qwen 3.8 27B)</a></li>
@@ -51,7 +52,7 @@ export default function Footer({ onOpenDemo, onOpenAuth }) {
 
           {/* Col 4: Portals & Access */}
           <div className="footer-col">
-            <h4 className="footer-col-title">Portals & Access</h4>
+            <SpringHeading tag="h4" align="left" className="footer-col-title">Portals & Access</SpringHeading>
             <ul className="footer-link-list">
               <li><button type="button" onClick={() => onOpenAuth('login')} className="footer-action-link">Recruiter Portal Login</button></li>
               <li><button type="button" onClick={() => onOpenAuth('login')} className="footer-action-link">Admin Security Console</button></li>

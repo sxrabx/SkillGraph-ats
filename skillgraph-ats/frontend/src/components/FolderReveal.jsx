@@ -7,13 +7,13 @@ import { FileText, Download, Eye, ExternalLink } from 'lucide-react'
  */
 export const FOLDER_PALETTES = {
   brand: {
-    back: '#7c3aed',
-    tab: '#6d28d9',
-    flap: '#8b5cf6',
-    well: '#5b21b6',
+    back: '#ff5500',
+    tab: '#e04b00',
+    flap: '#ff6e26',
+    well: '#cc4400',
     tabText: '#ffffff',
     highlight: 'rgba(255, 255, 255, 0.45)',
-    glow: 'rgba(139, 92, 246, 0.35)'
+    glow: 'rgba(255, 85, 0, 0.45)'
   },
   blue: {
     back: '#0284c7',

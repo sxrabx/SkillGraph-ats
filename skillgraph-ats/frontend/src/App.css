@@ -637,10 +637,10 @@
   border: 1px solid #a7f3d0;
 }
 
-.legend-chip.purple {
-  background: #faf5ff;
-  color: #6b21a8;
-  border: 1px solid #e9d5ff;
+.legend-chip.orange {
+  background: rgba(255, 85, 0, 0.08);
+  color: #ff5500;
+  border: 1px solid rgba(255, 85, 0, 0.28);
 }
 
 .legend-chip.blue {
@@ -656,7 +656,7 @@
   display: inline-block;
 }
 .dot-green { background: #10b981; }
-.dot-purple { background: #8b5cf6; }
+.dot-orange { background: #ff5500; }
 .dot-blue { background: #3b82f6; }
 
 /* ============================================================

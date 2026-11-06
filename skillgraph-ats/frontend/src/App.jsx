@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import './landing.css'
+import './dashboard-bento.css'
 
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import ShaderRevealStripesTransition from './components/ShaderRevealStripesTransition'
@@ -12,12 +13,15 @@ import CookieBanner from './components/CookieBanner'
 import AuthPage from './components/AuthPage'
 import RequestDemoModal from './components/RequestDemoModal'
 import Dashboard from './components/Dashboard'
+import PixelTrailCursor from './components/PixelTrailCursor'
 
 function AppContent() {
   const { theme } = useTheme()
 
   // Full-screen initial loader
   const [showLoader, setShowLoader] = useState(true)
+  const [isLoaderExiting, setIsLoaderExiting] = useState(false)
+  const [loaderExited, setLoaderExited] = useState(false)
 
   // Authentication State
   const [user, setUser] = useState(() => {
@@ -82,9 +86,19 @@ function AppContent() {
   return (
     <ShaderRevealStripesTransition transitionKey={theme} duration={650}>
       <div className={`app-root-container ${theme}-theme`} data-theme={theme}>
+        {/* Global Pixel Trail Cursor (Across entire site) */}
+        <PixelTrailCursor />
+
         {/* 0. FULLSCREEN LOADER WITH LOGO, 9PX STROKE & FLY-UPWARDS EXIT */}
         {showLoader && (
-          <FullScreenLoader onFinish={() => setShowLoader(false)} />
+          <FullScreenLoader 
+            onStartExit={() => setIsLoaderExiting(true)}
+            onFinish={() => {
+              setShowLoader(false)
+              setIsLoaderExiting(false)
+              setLoaderExited(true)
+            }} 
+          />
         )}
 
         {/* 1. LANDING PAGE VIEW */}
@@ -104,6 +118,9 @@ function AppContent() {
                 onOpenDemo={handleOpenDemo}
                 onOpenAuth={handleOpenAuth}
                 onEnterWorkspace={handleGoToDashboard}
+                isLoaderExiting={isLoaderExiting}
+                showLoader={showLoader}
+                loaderExited={loaderExited}
               />
             </main>
 

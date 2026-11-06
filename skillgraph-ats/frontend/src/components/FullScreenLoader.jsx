@@ -1,124 +1,218 @@
-import React, { useState, useEffect } from 'react'
-import Logo from './Logo'
+import React, { useState, useEffect, useRef } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 
-export default function FullScreenLoader({ onFinish }) {
+/**
+ * REIMAGINED SWISS BRUTALIST CALIBRATION LOADER
+ * 
+ * Aesthetic:
+ * - High-density Swiss technical telemetry
+ * - Giant tabular grotesque numeral counter
+ * - Heavy-duty monolithic progress bar with 25% / 50% / 75% ruler ticks
+ * - Live terminal telemetry steps with blinking cursor
+ * - 4 Corner coordinate stamps
+ * - Alternating architectural guillotine column exit reveal
+ */
+export default function FullScreenLoader({ onFinish, onStartExit }) {
+  const shouldReduceMotion = useReducedMotion()
   const [progress, setProgress] = useState(0)
   const [isExiting, setIsExiting] = useState(false)
   const [isUnmounted, setIsUnmounted] = useState(false)
+  
+  const hasTriggeredExitRef = useRef(false)
+  const hasFinishedRef = useRef(false)
 
-  const safeProgress = Number.isFinite(progress) ? Math.max(0, Math.min(100, progress)) : 0
-  const radius = 140
-  const circumference = 2 * Math.PI * radius // ~879.64
-  const strokeOffset = circumference - (safeProgress / 100) * circumference
-
+  // 1. Progress Counter Simulation (0% -> 100%)
   useEffect(() => {
-    // Smooth progress animation from 0% to 100%
+    if (shouldReduceMotion) {
+      setProgress(100)
+      if (onStartExit && !hasTriggeredExitRef.current) {
+        hasTriggeredExitRef.current = true
+        onStartExit()
+      }
+      const t = setTimeout(() => {
+        setIsUnmounted(true)
+        if (onFinish && !hasFinishedRef.current) {
+          hasFinishedRef.current = true
+          onFinish()
+        }
+      }, 300)
+      return () => clearTimeout(t)
+    }
+
+    const duration = 1600 // High-speed, authoritative telemetry pacing
     const startTime = performance.now()
-    const duration = 1800 // 1.8 seconds loading time
+    let frameId
 
-    const animateProgress = (currentTime) => {
-      const elapsed = currentTime - startTime
-      const currentProgress = Math.min(100, (elapsed / duration) * 100)
-      
-      // Easing curve for realistic loading (accelerates then decelerates to 100)
-      const eased = Math.min(100, Math.pow(currentProgress / 100, 0.9) * 100)
-      setProgress(eased)
+    const step = (now) => {
+      const elapsed = now - startTime
+      const p = Math.min(1, elapsed / duration)
+      // Swiss Brutalist pacing: purposeful acceleration, deliberate mechanical brake into 100
+      const eased = p < 0.6 ? Math.pow(p / 0.6, 1.2) * 0.7 : 0.7 + (1 - Math.pow(1 - (p - 0.6) / 0.4, 2.5)) * 0.3
+      const current = Math.min(100, Math.floor(eased * 100))
 
-      if (elapsed < duration) {
-        requestAnimationFrame(animateProgress)
+      setProgress(current)
+
+      if (p < 1) {
+        frameId = requestAnimationFrame(step)
       } else {
         setProgress(100)
-        // Hold at 100% for 200ms, then trigger flying upwards exit animation
+        // Brief hold at 100%, then trigger heavy architectural exit
         setTimeout(() => {
           setIsExiting(true)
-          // Unmount after exit slide completes (750ms)
+          if (onStartExit && !hasTriggeredExitRef.current) {
+            hasTriggeredExitRef.current = true
+            onStartExit()
+          }
+
+          // Complete exit after columns finish animating
           setTimeout(() => {
             setIsUnmounted(true)
-            if (onFinish) onFinish()
-          }, 750)
+            if (onFinish && !hasFinishedRef.current) {
+              hasFinishedRef.current = true
+              onFinish()
+            }
+          }, 850)
         }, 220)
       }
     }
 
-    const frameId = requestAnimationFrame(animateProgress)
+    frameId = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frameId)
-  }, [onFinish])
+  }, [shouldReduceMotion, onStartExit, onFinish])
 
   if (isUnmounted) return null
 
+  // Tabular number string
+  const formattedProgress = `${String(progress).padStart(2, '0')}%`
+
+  // Live Terminal Telemetry Step Description
+  const getStatusText = (val) => {
+    if (val < 25) return 'INDEXING DIRECTED ACYCLIC GRAPH ONTOLOGY...'
+    if (val < 55) return 'VECTORIZING 2048-D NVIDIA NIM CLOUD EMBEDDINGS...'
+    if (val < 85) return 'MOUNTING GROQ LPU INFERENCE ENGINE (<45MS)...'
+    if (val < 100) return 'VERIFYING PYMUPDF VISUAL EVIDENCE PIPELINE...'
+    return 'CALIBRATION COMPLETE // ALL SYSTEMS OPERATIONAL'
+  }
+
+  // 4 Alternating Vertical Architectural Guillotine Columns
+  const columns = [
+    { id: 0, direction: -1, delay: 0.0 },   // shoots UP
+    { id: 1, direction: 1, delay: 0.05 },    // shoots DOWN
+    { id: 2, direction: -1, delay: 0.09 },   // shoots UP
+    { id: 3, direction: 1, delay: 0.13 }     // shoots DOWN
+  ]
+
+  const shutterEase = [0.85, 0, 0.15, 1] // Heavy architectural guillotine acceleration
+
   return (
-    <div 
-      className={`fullscreen-loader-overlay ${isExiting ? 'flying-upwards' : ''}`}
-      aria-hidden="true"
-    >
-      <div className="loader-ambient-glow"></div>
+    <div className="brutalist-loader-root" aria-hidden="true">
+      {/* 4 REVEAL PANELS (Guillotine Columns) */}
+      <div className="brutalist-shutter-columns">
+        {columns.map((col) => (
+          <motion.div
+            key={col.id}
+            className={`shutter-column col-${col.id}`}
+            initial={{ y: '0%' }}
+            animate={isExiting ? { y: col.direction === -1 ? '-101%' : '101%' } : { y: '0%' }}
+            transition={{
+              duration: 0.75,
+              delay: col.delay,
+              ease: shutterEase
+            }}
+          />
+        ))}
+      </div>
 
-      <div className="loader-center-container">
-        {/* SVG Loading Ring with exact 9px stroke */}
-        <div className="loader-circle-wrapper">
-          <svg 
-            width="320" 
-            height="320" 
-            viewBox="0 0 320 320" 
-            className="loader-svg-circle"
-          >
-            <defs>
-              <linearGradient id="purpleRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#c084fc" />
-                <stop offset="50%" stopColor="#9d72ff" />
-                <stop offset="100%" stopColor="#7c3aed" />
-              </linearGradient>
-            </defs>
+      {/* FOREGROUND HUD CONTENT (Fades out just as shutters fly apart) */}
+      <motion.div 
+        className="brutalist-loader-hud"
+        animate={isExiting ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+      >
+        {/* 4 Structural Corner Coordinate Brackets */}
+        <div className="hud-corner top-left">
+          <span className="corner-cross">+</span>
+          <span className="corner-coord">[ 00.00 // SYS.INIT ]</span>
+        </div>
 
-            {/* Inactive Track (9px stroke) */}
-            <circle
-              cx="160"
-              cy="160"
-              r={radius}
-              fill="transparent"
-              stroke="rgba(255, 255, 255, 0.07)"
-              strokeWidth="9"
-            />
+        <div className="hud-corner top-right">
+          <span className="corner-coord">[ 2048-D // NVIDIA.NIM ]</span>
+          <span className="corner-cross">+</span>
+        </div>
 
-            {/* Animated Active Purple Ring (9px stroke) */}
-            <circle
-              cx="160"
-              cy="160"
-              r={radius}
-              fill="transparent"
-              stroke="url(#purpleRingGrad)"
-              strokeWidth="9"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeOffset}
-              style={{
-                filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.65))',
-                transformOrigin: 'center',
-                transform: 'rotate(-90deg)',
-                transition: 'stroke-dashoffset 0.05s linear'
-              }}
-            />
-          </svg>
+        <div className="hud-corner bottom-left">
+          <span className="corner-cross">+</span>
+          <span className="corner-coord">[ GROQ // &lt;45MS ]</span>
+        </div>
 
-          {/* Logo Placed in the Center */}
-          <div className="loader-logo-content">
-            <Logo height={48} />
+        <div className="hud-corner bottom-right">
+          <span className="corner-coord">[ KERNEL // v2.4 ]</span>
+          <span className="corner-cross">+</span>
+        </div>
+
+        {/* Center Stage: Hero Numeral + Chunky Progress Bar */}
+        <div className="hud-center-stage">
+          {/* Top Stamp */}
+          <div className="hud-system-stamp">
+            <span className="stamp-badge">SYS.CALIBRATION</span>
+            <span className="stamp-line"></span>
+            <span className="stamp-channel">CH-01 // REALTIME</span>
+          </div>
+
+          {/* Massive Tabular Numeral */}
+          <div className="hud-number-row">
+            <span className="hud-big-num">{formattedProgress}</span>
+          </div>
+
+          {/* Monolithic Chunky Progress Bar */}
+          <div className="hud-progress-block">
+            <div className="hud-bar-frame">
+              {/* Internal Tick Dividers */}
+              <div className="bar-tick tick-25"></div>
+              <div className="bar-tick tick-50"></div>
+              <div className="bar-tick tick-75"></div>
+
+              {/* Animated Solid Orange Fill */}
+              <div 
+                className="hud-bar-fill" 
+                style={{ width: `${progress}%` }}
+              >
+                <div className="fill-edge-indicator"></div>
+              </div>
+            </div>
+
+            {/* Ruler Markings */}
+            <div className="hud-ruler-row">
+              <span className="ruler-mark">| 00%</span>
+              <span className="ruler-mark">| 25%</span>
+              <span className="ruler-mark">| 50%</span>
+              <span className="ruler-mark">| 75%</span>
+              <span className="ruler-mark">| 100%</span>
+            </div>
+          </div>
+
+          {/* Dynamic Console Telemetry */}
+          <div className="hud-telemetry-box">
+            <span className="telemetry-prompt">&gt;</span>
+            <span className="telemetry-text">{getStatusText(progress)}</span>
+            <span className="telemetry-cursor">▮</span>
           </div>
         </div>
 
-        {/* Loading status & percentage */}
-        <div className="loader-status-info">
-          <span className="loader-percentage">{Math.round(progress)}%</span>
-          <span className="loader-status-text">
-            {progress < 40 
-              ? 'Initializing DAG Ontology...' 
-              : progress < 85 
-                ? 'Loading 2048-dim Cloud GPU Vectors...' 
-                : 'Ready'}
-          </span>
+        {/* Bottom Status Ticker */}
+        <div className="hud-bottom-bar">
+          <div className="hud-status-item">
+            <span className="item-dot"></span>
+            <span>MEMORY: 0x7FFF98A2</span>
+          </div>
+          <div className="hud-status-item">
+            <span>PIPELINE: DETERMINISTIC</span>
+          </div>
+          <div className="hud-status-item">
+            <span>STATE: {progress === 100 ? 'ARMED' : 'CALIBRATING'}</span>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
-

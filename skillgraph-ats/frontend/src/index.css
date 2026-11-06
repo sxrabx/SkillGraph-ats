@@ -1,5 +1,6 @@
 /* ============================================================
-   SKILLGRAPH ATS — GLOBAL BASE RESET & DESIGN FOUNDATION
+   SKILLGRAPH ATS — GLOBAL BASE RESET & SWISS DESIGN FOUNDATION
+   Color Theory: Black & Orange (Dark) / Off-White Beige & Orange (Light)
    ============================================================ */
 
 *, *::before, *::after {
@@ -8,30 +9,92 @@
   padding: 0;
 }
 
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 :root {
-  --font-sans: 'Segoe UI', 'Microsoft Sans Serif', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Hybrid Typography: Swiss Grotesque + Monospace + Handwriting */
+  --font-sans: 'Space Grotesk', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-handwriting: 'Caveat', cursive;
 
-  /* Color System */
-  --bg-page: #f8fafc;
+  /* Color System — Warm Off-White Beige Light Theme */
+  --bg-page: #f7f4ee;
   --bg-card: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --border-light: #e2e8f0;
-  --border-hover: #cbd5e1;
+  --bg-subtle: #efece4;
+  --bg-accent-soft: #faeee6;
+  --border-light: #ded7c8;
+  --border-hover: #c9c0ae;
+  --border-neo: #121316;
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #94a3b8;
+  --text-primary: #121316;
+  --text-secondary: #48443b;
+  --text-tertiary: #7d786d;
 
-  --brand-primary: #4f46e5;
-  --brand-hover: #4338ca;
-  --brand-light: #eef2ff;
-  --brand-border: #c7d2fe;
+  /* Pure Swiss Orange System (Zero Purple) */
+  --brand-primary: #ff5500;
+  --brand-hover: #e04b00;
+  --brand-light: rgba(255, 85, 0, 0.08);
+  --brand-border: rgba(255, 85, 0, 0.28);
+  --brand-glow: rgba(255, 85, 0, 0.4);
 
-  --accent-cyan: #06b6d4;
-  --accent-green: #10b981;
-  --accent-purple: #8b5cf6;
+  --accent-orange: #ff5500;
+  --accent-orange-bright: #ff6619;
   --accent-amber: #f59e0b;
+  --accent-green: #10b981;
+  --accent-cyan: #06b6d4;
+  --accent-red: #ef4444;
+}
+
+[data-theme="dark"] {
+  /* Color System — Pure Black & Signal Orange Dark Theme */
+  --bg-page: #000000;
+  --bg-card: #0c0c0e;
+  --bg-subtle: #141417;
+  --bg-accent-soft: rgba(255, 85, 0, 0.08);
+  --border-light: #222227;
+  --border-hover: #363640;
+  --border-neo: #ffffff;
+
+  --text-primary: #f8f8f8;
+  --text-secondary: #a3a3ad;
+  --text-tertiary: #6b6b77;
+
+  /* Orange System in Dark Mode */
+  --brand-primary: #ff5500;
+  --brand-hover: #ff6e26;
+  --brand-light: rgba(255, 85, 0, 0.12);
+  --brand-border: rgba(255, 85, 0, 0.35);
+  --brand-glow: rgba(255, 85, 0, 0.55);
+}
+
+/* Lenis Smooth Scroll Recommended Base Styles */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 html, body {
@@ -39,11 +102,26 @@ html, body {
   min-height: 100vh;
   background-color: var(--bg-page);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  letter-spacing: -0.025em;
+}
+
+/* Flex alignment utilities for spring-text-engine containers */
+.justify-center {
+  justify-content: center !important;
+}
+
+.justify-start {
+  justify-content: flex-start !important;
 }
 
 #root {
@@ -51,6 +129,8 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-page);
+  position: relative;
 }
 
 /* Screen reader only utility */
@@ -65,20 +145,49 @@ html, body {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-page);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-hover);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--brand-primary);
 }
+
+
+/* ============================================================
+   PIXEL TRAIL CURSOR OVERLAY (ACCESSIBLE, ADDITIVE, PASS-THROUGH)
+   ============================================================ */
+.pixel-trail-canvas-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+  z-index: 9998;
+  display: block;
+}
+
+/* ============================================================
+   SPRING TEXT ENGINE UTILITY CLASSES
+   ============================================================ */
+.justify-center {
+  justify-content: center !important;
+}
+
+.justify-start {
+  justify-content: flex-start !important;
+}
+

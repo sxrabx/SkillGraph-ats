@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { X, Lock, Mail, User, Shield, Briefcase, ArrowRight, CheckCircle2, Sparkles, KeyRound } from 'lucide-react'
 import Logo from './Logo'
+import SpringHeading from './SpringHeading'
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLoginSuccess }) {
   const [mode, setMode] = useState(initialMode) // 'login' | 'signup'
@@ -89,9 +90,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
         {/* Brand Header */}
         <div className="auth-header">
           <Logo height={32} />
-          <h2 className="auth-title">
+          <SpringHeading 
+            tag="h2" 
+            align="center" 
+            className="auth-title justify-center" 
+            key={mode}
+          >
             {mode === 'login' ? 'Sign in to SkillGraph' : 'Create Recruiter Account'}
-          </h2>
+          </SpringHeading>
           <p className="auth-subtitle">
             {mode === 'login' 
               ? 'Access real-time GraphRAG candidate evaluation and highlighted resume inspections.' 
